@@ -45,9 +45,17 @@ export function initDB(): void {
       position INTEGER,
       added_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS downloads (
+      url TEXT PRIMARY KEY,
+      title TEXT,
+      file_path TEXT,
+      format TEXT,
+      downloaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
-  // Migrate: add album/scraped_at columns if upgrading from old schema
+  // Migrate: add columns if upgrading from old schema
   try { d.exec(`ALTER TABLE history ADD COLUMN album TEXT`); } catch {}
   try { d.exec(`ALTER TABLE history ADD COLUMN scraped_at DATETIME`); } catch {}
 

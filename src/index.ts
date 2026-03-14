@@ -14,6 +14,7 @@ import { scrapeHistory, getHistoryFromDB } from './history/index';
 import { createPlaylist, addToPlaylist, listPlaylists, exportPlaylist, removeFromPlaylist } from './playlist/index';
 import { playSong, play, pause, next, previous, setVolume, getCurrentSong } from './tools/playback';
 import { launchBrowser, closeBrowser } from './browser/index';
+import { searchYtDlp, downloadSong, downloadBatch, listDownloads } from './downloader/index';
 
 // Init DB
 initDB();
@@ -116,6 +117,47 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         },
       },
     },
+    {
+      name: 'search_song',
+      description: 'Search YouTube Music for a song',
+      inputSchema: {
+        type: 'object',
+        required: ['query'],
+        properties: {
+          query: { type: 'string', description: 'Song name or artist' },
+          limit: { type: 'number', description: 'Max results (default 5)' },
+        },
+      },
+    },
+    {
+      name: 'download_song',
+      description: 'Download a song by YouTube Music URL',
+      inputSchema: {
+        type: 'object',
+        required: ['url'],
+        properties: {
+          url: { type: 'string', description: 'YouTube Music URL' },
+          format: { type: 'string', enum: ['opus', 'mp3'], description: 'Audio format (default opus)' },
+          title: { type: 'string', description: 'Optional title hint' },
+        },
+      },
+    },
+    {
+      name: 'download_history',
+      description: 'Download last N songs from listening history',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', description: 'Number of history songs to download (default 12)' },
+          format: { type: 'string', enum: ['opus', 'mp3'], description: 'Audio format (default opus)' },
+        },
+      },
+    },
+    {
+      name: 'list_downloads',
+      description: 'List all downloaded songs',
+      inputSchema: { type: 'object', properties: {} },
+    },
   ],
 }));
 
@@ -192,6 +234,49 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
           (args?.format as 'json' | 'csv') || 'json'
         );
         return { content: [{ type: 'text', text: `Exported to: ${out}` }] };
+      }
+
+      case 'search_song': {
+        const results = await searchYtDlp(args?.query as string, (args?.limit as number) || 5);
+        return { content: [{ type: 'text', text: JSON.stringify(results, null, 2) }] };
+      }
+
+      case 'download_song': {
+        const result = await downloadSong(
+          args?.url as string,
+          (args?.format as 'opus' | 'mp3') || 'opus',
+          args?.title as string | undefined
+        );
+        const msg = result.status === 'success'
+          ? `✅ Downloaded: ${result.title}\nFile: ${result.filePath}`
+          : `❌ Failed: ${result.error}`;
+        return { content: [{ type: 'text', text: msg }] };
+      }
+
+      case 'download_history': {
+        const limit = (args?.limit as number) || 12;
+        const format = (args?.format as 'opus' | 'mp3') || 'opus';
+        // Get from DB cache (already scraped)
+        const { getHistoryFromDB } = await import('./history/index.js');
+        const history = getHistoryFromDB(limit);
+        if (history.length === 0) {
+          return { content: [{ type: 'text', text: 'No history in DB. Run get_history first.' }] };
+        }
+        const items = history.filter(h => h.url).map(h => ({ url: h.url, title: h.title }));
+        const results = await downloadBatch(items, format);
+        const success = results.filter(r => r.status === 'success').length;
+        const failed = results.filter(r => r.status === 'failed').length;
+        const summary = results.map(r =>
+          `${r.status === 'success' ? '✅' : '❌'} ${r.title}`
+        ).join('\n');
+        return { content: [{ type: 'text', text: `Downloaded ${success}/${results.length} songs (${failed} failed)\n\n${summary}` }] };
+      }
+
+      case 'list_downloads': {
+        const files = listDownloads();
+        if (files.length === 0) return { content: [{ type: 'text', text: 'No downloads yet.' }] };
+        const list = files.map(f => `${f.file} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join('\n');
+        return { content: [{ type: 'text', text: list }] };
       }
 
       default:
