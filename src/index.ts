@@ -12,7 +12,7 @@ import { initDB } from './db';
 
 import { scrapeHistory, getHistoryFromDB } from './history/index';
 import { createPlaylist, addToPlaylist, listPlaylists, exportPlaylist, removeFromPlaylist } from './playlist/index';
-import { playSong, play, pause, next, previous, setVolume, getCurrentSong } from './tools/playback';
+import { playSong, playByUrl, play, pause, next, previous, setVolume, seekTo, likeSong, dislikeSong, shuffleToggle, repeatToggle, getCurrentSong, togglePlayPause } from './tools/playback';
 import { launchBrowser, closeBrowser } from './browser/index';
 import { searchYtDlp, downloadSong, downloadBatch, listDownloads } from './downloader/index';
 
@@ -43,21 +43,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       description: 'Search and play a song on YouTube Music',
       inputSchema: {
         type: 'object',
-        required: ['query'],
         properties: {
           query: { type: 'string', description: 'Song name or artist to search' },
+          url: { type: 'string', description: 'Direct YouTube Music URL to play' },
         },
       },
     },
     {
       name: 'playback_control',
-      description: 'Control playback: play, pause, next, previous',
+      description: 'Control playback: play, pause, next, previous, shuffle, repeat, like, dislike',
       inputSchema: {
         type: 'object',
         required: ['action'],
         properties: {
-          action: { type: 'string', enum: ['play', 'pause', 'next', 'previous'] },
-          volume: { type: 'number', description: 'Volume level 0-100 (only for set_volume)' },
+          action: {
+            type: 'string',
+            enum: ['play', 'pause', 'toggle', 'next', 'previous', 'shuffle', 'repeat', 'like', 'dislike'],
+          },
+          volume: { type: 'number', description: 'Volume 0-100 (use with set_volume action)' },
+          seek: { type: 'number', description: 'Seek to seconds (use with seek action)' },
         },
       },
     },
@@ -184,30 +188,42 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
 
       case 'play_song': {
-        const query = args?.query as string;
         await launchBrowser(false);
-        const title = await playSong(query);
-        return {
-          content: [{ type: 'text', text: `Now playing: ${title}` }],
-        };
+        if (args?.url) {
+          await playByUrl(args.url as string);
+          return { content: [{ type: 'text', text: `▶️ Playing: ${args.url}` }] };
+        }
+        const title = await playSong(args?.query as string);
+        return { content: [{ type: 'text', text: `▶️ Now playing: ${title}` }] };
       }
 
       case 'playback_control': {
         const action = args?.action as string;
-        const volume = args?.volume as number | undefined;
-        if (action === 'play') await play();
-        else if (action === 'pause') await pause();
-        else if (action === 'next') await next();
-        else if (action === 'previous') await previous();
-        else if (action === 'set_volume' && volume !== undefined) await setVolume(volume);
-        return { content: [{ type: 'text', text: `Playback: ${action} executed` }] };
+        switch (action) {
+          case 'play':     await play(); break;
+          case 'pause':    await pause(); break;
+          case 'toggle':   await togglePlayPause(); break;
+          case 'next':     await next(); break;
+          case 'previous': await previous(); break;
+          case 'shuffle':  await shuffleToggle(); break;
+          case 'repeat':   await repeatToggle(); break;
+          case 'like':     await likeSong(); break;
+          case 'dislike':  await dislikeSong(); break;
+          case 'volume':
+            await setVolume(args?.volume as number ?? 50); break;
+          case 'seek':
+            await seekTo(args?.seek as number ?? 0); break;
+        }
+        return { content: [{ type: 'text', text: `✅ ${action} executed` }] };
       }
 
       case 'get_current_song': {
         const song = await getCurrentSong();
-        return {
-          content: [{ type: 'text', text: song ? `${song.title} — ${song.artist}` : 'Nothing playing' }],
-        };
+        if (!song) return { content: [{ type: 'text', text: '⏹ Nothing playing' }] };
+        const state = song.isPlaying ? '▶️' : '⏸';
+        const liked = song.liked ? ' ❤️' : '';
+        const text = `${state} ${song.title} — ${song.artist}${liked}\n⏱ ${song.currentTime} / ${song.duration} | 🔊 ${song.volume}%`;
+        return { content: [{ type: 'text', text: text }] };
       }
 
       case 'create_playlist': {
