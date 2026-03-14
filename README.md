@@ -1,78 +1,105 @@
-# ytm-mcp 🎵
-
-A Model Context Protocol (MCP) server for YouTube Music — control playback, browse history, manage playlists, and download songs, all from Claude or any MCP-compatible AI.
-
-## Features
-
-- 🎧 **History** — Scrape your YouTube Music listening history with song titles, artists, albums, and URLs
-- 🔍 **Search** — Search YouTube Music for any song or artist
-- ▶️ **Playback Control** — Play, pause, skip, seek, set volume, like/dislike, shuffle, repeat
-- 📥 **Downloads** — Download songs as Opus or MP3 via yt-dlp with embedded metadata
-- 📋 **Playlists** — Create, manage, and export local playlists
-- 💾 **Database** — All history and downloads persisted to SQLite
+<p align="center">
+  <h1 align="center">🎵 ytm-mcp</h1>
+  <p align="center">A full-featured <strong>YouTube Music MCP server</strong> — control playback, browse history, download songs, manage playlists, and more from any AI assistant.</p>
+  <p align="center">
+    <a href="https://github.com/4shil/ytm-mcp/stargazers"><img src="https://img.shields.io/github/stars/4shil/ytm-mcp?style=flat-square" /></a>
+    <a href="https://github.com/4shil/ytm-mcp/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" /></a>
+    <img src="https://img.shields.io/badge/MCP-compatible-brightgreen?style=flat-square" />
+    <img src="https://img.shields.io/badge/built%20with-TypeScript-blue?style=flat-square" />
+  </p>
+</p>
 
 ---
 
-## Requirements
+## What is ytm-mcp?
 
-- Node.js 18+
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) installed (`which yt-dlp`)
-- Python `mutagen` library: `pip install mutagen`
-- Chromium or Chrome browser (for playback control)
-- An active YouTube Music session in your browser profile
+**ytm-mcp** is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that gives AI assistants full control over YouTube Music. Connect it to Claude, Cursor, VS Code, or any MCP-compatible tool and control your music with natural language.
+
+```
+"What were my last 12 songs?"
+"Download all my recent history as opus files"
+"Play Stars Ultra Slowed and like it"
+"Skip to the next track and turn the volume to 70"
+"Create a playlist called Night Drive from my history"
+```
 
 ---
 
-## Installation
+## ✨ Features
+
+| Category | What you get |
+|----------|-------------|
+| 🎧 **History** | Scrape your full listening history with titles, artists, albums & URLs |
+| 🔍 **Search** | Search YouTube Music for any song, artist, or album |
+| ▶️ **Playback** | Play, pause, skip, seek, volume, like, shuffle, repeat |
+| 📥 **Downloads** | Download songs as Opus or MP3 via yt-dlp with embedded metadata & thumbnails |
+| 📋 **Playlists** | Create, edit, export local playlists as JSON or CSV |
+| 💾 **Database** | SQLite persistence — history, downloads, playlists all cached locally |
+
+---
+
+## 🛠 Requirements
+
+- **Node.js** 18+
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — for downloading songs
+- **Python mutagen** — for embedding metadata: `pip install mutagen`
+- **Chrome or Chromium** — must be logged into YouTube Music
+
+---
+
+## 🚀 Installation
 
 ```bash
+# 1. Clone the repo
 git clone https://github.com/4shil/ytm-mcp.git
 cd ytm-mcp
+
+# 2. Install dependencies
 npm install
+
+# 3. Build
 npm run build
+
+# 4. Configure
+cp .env.example .env
 ```
 
 ### Find your Chrome profile path
 
-**Linux (Chrome):** `~/.config/google-chrome/Default`  
-**Linux (Chromium):** `~/.config/chromium/Default`  
-**macOS (Chrome):** `~/Library/Application Support/Google/Chrome/Default`  
-**Windows (Chrome):** `%LOCALAPPDATA%\Google\Chrome\User Data\Default`
+This is the folder where your browser stores your logged-in session.
 
-> The profile must be logged into YouTube Music already.
+| Platform | Path |
+|----------|------|
+| Linux (Chrome) | `~/.config/google-chrome/Default` |
+| Linux (Chromium) | `~/.config/chromium/Default` |
+| macOS (Chrome) | `~/Library/Application Support/Google/Chrome/Default` |
+| Windows (Chrome) | `%LOCALAPPDATA%\Google\Chrome\User Data\Default` |
 
-### Environment Variables
+> ⚠️ The profile must already be logged into YouTube Music. The server won't handle login — just reuse your existing session.
 
-Copy `.env.example` to `.env` and configure:
-
-```bash
-cp .env.example .env
-```
+### `.env` Configuration
 
 ```env
-# Path to Chrome/Chromium profile with YouTube Music logged in
-# Linux Chrome:   /home/<user>/.config/google-chrome/Default
-# macOS Chrome:   /Users/<user>/Library/Application Support/Google/Chrome/Default
-# Windows Chrome: C:\Users\<user>\AppData\Local\Google\Chrome\User Data\Default
+# Your Chrome/Chromium profile path (see table above)
 BROWSER_PROFILE=/path/to/your/chrome-profile
 
-# Directory to save downloaded songs (default: ./downloads)
+# Where downloaded songs are saved
 DOWNLOAD_DIR=./downloads
 
-# SQLite database path (default: ./db/ytm.db)
+# SQLite database location
 DB_PATH=./db/ytm.db
 ```
 
 ---
 
-## Setup
+## 🔌 Connect to Your AI Tool
 
 ### Claude Desktop
 
-**Config file:**
-- Linux: `~/.config/Claude/claude_desktop_config.json`
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+Edit `claude_desktop_config.json`:
+- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -81,16 +108,14 @@ DB_PATH=./db/ytm.db
       "command": "node",
       "args": ["/path/to/ytm-mcp/dist/index.js"],
       "env": {
-        "BROWSER_PROFILE": "/path/to/your/chrome-profile",
-        "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
-        "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
+        "BROWSER_PROFILE": "/path/to/your/chrome-profile"
       }
     }
   }
 }
 ```
 
-Restart Claude Desktop after saving.
+Restart Claude Desktop. You'll see ytm-mcp in the tools list. ✅
 
 ---
 
@@ -107,9 +132,7 @@ Add to `~/.openclaw/config.json`:
         "command": "node",
         "args": ["/path/to/ytm-mcp/dist/index.js"],
         "env": {
-          "BROWSER_PROFILE": "/path/to/your/chrome-profile",
-          "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
-          "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
+          "BROWSER_PROFILE": "/path/to/your/chrome-profile"
         }
       }
     ]
@@ -117,7 +140,7 @@ Add to `~/.openclaw/config.json`:
 }
 ```
 
-Or use the mcporter CLI:
+Or with mcporter:
 
 ```bash
 mcporter add ytm-mcp --command "node /path/to/ytm-mcp/dist/index.js"
@@ -127,7 +150,7 @@ mcporter add ytm-mcp --command "node /path/to/ytm-mcp/dist/index.js"
 
 ### Cursor
 
-Add to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` globally:
+Create or edit `~/.cursor/mcp.json`:
 
 ```json
 {
@@ -136,9 +159,7 @@ Add to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` globally
       "command": "node",
       "args": ["/path/to/ytm-mcp/dist/index.js"],
       "env": {
-        "BROWSER_PROFILE": "/path/to/your/chrome-profile",
-        "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
-        "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
+        "BROWSER_PROFILE": "/path/to/your/chrome-profile"
       }
     }
   }
@@ -147,9 +168,9 @@ Add to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` globally
 
 ---
 
-### VS Code (Copilot / MCP extension)
+### VS Code (GitHub Copilot)
 
-Add to `.vscode/mcp.json`:
+Create `.vscode/mcp.json` in your workspace:
 
 ```json
 {
@@ -159,9 +180,7 @@ Add to `.vscode/mcp.json`:
       "command": "node",
       "args": ["/path/to/ytm-mcp/dist/index.js"],
       "env": {
-        "BROWSER_PROFILE": "/path/to/your/chrome-profile",
-        "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
-        "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
+        "BROWSER_PROFILE": "/path/to/your/chrome-profile"
       }
     }
   }
@@ -182,9 +201,7 @@ Add to `~/.config/zed/settings.json`:
         "path": "node",
         "args": ["/path/to/ytm-mcp/dist/index.js"],
         "env": {
-          "BROWSER_PROFILE": "/path/to/your/chrome-profile",
-          "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
-          "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
+          "BROWSER_PROFILE": "/path/to/your/chrome-profile"
         }
       }
     }
@@ -208,9 +225,7 @@ Add to `~/.continue/config.json`:
           "command": "node",
           "args": ["/path/to/ytm-mcp/dist/index.js"],
           "env": {
-            "BROWSER_PROFILE": "/path/to/your/chrome-profile",
-            "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
-            "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
+            "BROWSER_PROFILE": "/path/to/your/chrome-profile"
           }
         }
       }
@@ -221,159 +236,213 @@ Add to `~/.continue/config.json`:
 
 ---
 
-### Any MCP-Compatible Tool (Generic)
+### Any MCP Tool (Generic)
 
-The server uses **stdio transport** (standard MCP). Run it with:
+ytm-mcp uses standard **stdio transport**. Any MCP-compatible tool can connect:
 
-```bash
-node /path/to/ytm-mcp/dist/index.js
 ```
-
-Any tool that supports MCP stdio servers can connect using:
-- **Command:** `node`
-- **Args:** `["/path/to/ytm-mcp/dist/index.js"]`
-- **Transport:** `stdio`
+Transport: stdio
+Command:   node
+Args:      ["/path/to/ytm-mcp/dist/index.js"]
+```
 
 ---
 
-## Available Tools
+## 🧰 Tools Reference
 
 ### 🎧 History
 
-| Tool | Description |
-|------|-------------|
-| `get_history` | Scrape last N songs from YTM history (default 20). Use `use_cache: true` to skip browser. |
+#### `get_history`
+Scrape your YouTube Music listening history.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `limit` | number | `20` | Number of songs to fetch |
+| `use_cache` | boolean | `false` | Return cached DB results (no browser) |
 
 ```
 get_history(limit: 12)
-get_history(limit: 20, use_cache: true)
+get_history(limit: 50, use_cache: true)
 ```
 
 ---
 
 ### 🔍 Search & Download
 
-| Tool | Description |
-|------|-------------|
-| `search_song` | Search YouTube Music, returns title + URL + duration + channel |
-| `download_song` | Download a song by URL as opus or mp3 |
-| `download_history` | Batch download your last N history songs |
-| `list_downloads` | List all downloaded files with sizes |
+#### `search_song`
+Search YouTube Music for songs.
 
-```
-search_song(query: "Stars Ultra Slowed")
-download_song(url: "https://music.youtube.com/watch?v=4Z8LwuQ3zao", format: "opus")
-download_history(limit: 12, format: "opus")
-list_downloads()
-```
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `query` | string | required | Song, artist, or album name |
+| `limit` | number | `5` | Max results to return |
+
+#### `download_song`
+Download a single song by URL.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `url` | string | required | YouTube Music URL |
+| `format` | string | `opus` | `opus` or `mp3` |
+| `title` | string | — | Optional title hint |
+
+#### `download_history`
+Batch download your recent listening history.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `limit` | number | `12` | Songs to download |
+| `format` | string | `opus` | `opus` or `mp3` |
+
+#### `list_downloads`
+List all downloaded files with sizes and timestamps.
 
 ---
 
 ### ▶️ Playback
 
-| Tool | Description |
-|------|-------------|
-| `play_song` | Search and play a song, or play by direct URL |
-| `playback_control` | Full playback control |
-| `get_current_song` | Get now-playing with time, volume, like status |
+#### `play_song`
+Search and play a song, or play by direct URL.
 
-**`playback_control` actions:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `query` | string | Search query (e.g. `"INSONAMIA ZYZZCVNT"`) |
+| `url` | string | Direct YouTube Music URL |
 
-| Action | Effect |
-|--------|--------|
+#### `playback_control`
+Full playback control in one tool.
+
+| Action | Description |
+|--------|-------------|
 | `play` | Resume playback |
 | `pause` | Pause playback |
 | `toggle` | Toggle play/pause |
 | `next` | Next track |
 | `previous` | Previous track |
 | `shuffle` | Toggle shuffle |
-| `repeat` | Toggle repeat |
+| `repeat` | Cycle repeat mode |
 | `like` | Like current song ❤️ |
 | `dislike` | Dislike current song |
-| `volume` | Set volume (0-100) |
-| `seek` | Seek to seconds |
+| `volume` | Set volume (`volume: 80`) |
+| `seek` | Seek to seconds (`seek: 45`) |
+
+#### `get_current_song`
+Get the current now-playing state.
 
 ```
-play_song(query: "INSONAMIA ZYZZCVNT")
-play_song(url: "https://music.youtube.com/watch?v=lJDMLwJV8Dk")
-playback_control(action: "like")
-playback_control(action: "volume", volume: 80)
-playback_control(action: "seek", seek: 45)
-get_current_song()
+▶️ Stars (Ultra Slowed) — SCXR SOUL ❤️
+⏱ 0:42 / 1:46 | 🔊 80%
 ```
 
 ---
 
 ### 📋 Playlists
 
+#### `create_playlist`
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | string | required | Playlist name |
+| `visibility` | string | `private` | `public` or `private` |
+
+#### `add_to_playlist`
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `playlist_id` | string | Target playlist ID |
+| `songs` | array | Array of `{ song_title, song_url, artist }` |
+
+#### `list_playlists`
+List all saved playlists.
+
+#### `export_playlist`
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `playlist_id` | string | required | Playlist to export |
+| `format` | string | `json` | `json` or `csv` |
+
+---
+
+## 🗺 Roadmap
+
+These tools are planned for future releases. PRs welcome!
+
 | Tool | Description |
 |------|-------------|
-| `create_playlist` | Create a new local playlist |
-| `add_to_playlist` | Add songs to a playlist |
-| `list_playlists` | List all playlists |
-| `export_playlist` | Export as JSON or CSV |
-
-```
-create_playlist(name: "Slowed Bangers", visibility: "private")
-add_to_playlist(playlist_id: "abc123", songs: [{ song_title: "Stars", song_url: "...", artist: "SCXR SOUL" }])
-export_playlist(playlist_id: "abc123", format: "json")
-```
-
----
-
-## Example Claude Prompts
-
-```
-"What were my last 12 songs on YouTube Music?"
-"Download all my recent history as opus files"
-"Play Stars Ultra Slowed by SCXR SOUL"
-"Pause the music"
-"Like this song and skip to the next one"
-"Search for phonk songs and download the top result"
-"Create a playlist called Night Drive and add my last 5 history songs"
-```
+| `get_queue` | View the current playback queue |
+| `add_to_queue` | Add a song to the queue without interrupting playback |
+| `clear_queue` | Clear the current queue |
+| `get_lyrics` | Fetch lyrics for the current or any song |
+| `get_recommendations` | Get AI-recommended songs based on listening history |
+| `get_artist_info` | Get artist bio, top songs, and discography |
+| `get_album` | Browse an album and list all tracks |
+| `get_trending` | Get trending songs and charts by region |
+| `remove_from_history` | Delete a specific song from your history |
+| `download_playlist` | Download an entire playlist at once |
+| `set_sleep_timer` | Auto-pause playback after N minutes |
+| `smart_playlist` | Auto-generate a playlist based on mood, genre, or history |
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 ytm-mcp/
 ├── src/
-│   ├── index.ts          # MCP server + tool handlers
-│   ├── db.ts             # SQLite database
+│   ├── index.ts          # MCP server entry point & tool handlers
+│   ├── db.ts             # SQLite database setup & migrations
 │   ├── browser/          # Playwright browser control
 │   ├── history/          # YouTube Music history scraper
-│   ├── downloader/       # yt-dlp search + download
+│   ├── downloader/       # yt-dlp search & download
 │   ├── tools/            # Playback controls
 │   ├── playlist/         # Playlist CRUD
 │   └── api/              # YouTube Data API (optional)
-├── downloads/            # Downloaded songs
-├── db/                   # SQLite database
-├── dist/                 # Compiled output
-└── .env                  # Configuration
+├── downloads/            # Downloaded songs (gitignored)
+├── db/                   # SQLite database (gitignored)
+├── dist/                 # Compiled JS output
+├── .env.example          # Environment variable template
+└── README.md
 ```
 
 ---
 
-## Troubleshooting
+## ❓ Troubleshooting
 
-**History returns empty:**  
-Make sure you're logged into YouTube Music in the browser profile set in `BROWSER_PROFILE`.
+**History returns empty**  
+→ Make sure `BROWSER_PROFILE` points to a profile that's already logged into YouTube Music. Open it in Chrome/Chromium and sign in manually first.
 
-**Download fails with mutagen error:**  
+**Download fails with mutagen error**
 ```bash
 pip install mutagen --break-system-packages
 ```
 
-**Playback controls don't work:**  
-YouTube Music must be open and playing in the browser. Run `play_song` first to open it.
+**Playback controls don't work**  
+→ YouTube Music must be open in the browser. Run `play_song` first to open it.
 
-**Git push hanging:**  
-Check for large files in git history. Use `git gc --aggressive --prune=now` or reinit the repo.
+**`chromium` not found**  
+→ Install it: `sudo apt install chromium` or adjust `BROWSER_PROFILE` to point to Chrome.
+
+**Build errors**
+```bash
+rm -rf dist node_modules
+npm install
+npm run build
+```
 
 ---
 
-## License
+## 🤝 Contributing
 
-MIT
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feat/my-tool`
+3. Commit your changes: `git commit -m 'feat: add get_queue tool'`
+4. Push and open a PR
+
+See the [Roadmap](#roadmap) for ideas on what to build next.
+
+---
+
+## 📄 License
+
+MIT © [4shil](https://github.com/4shil)
