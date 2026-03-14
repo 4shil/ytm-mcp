@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+cookies.json
+session.json
+downloads/
+exports/
+db/*.db
+*.log
+*.mp4
+*.mp4.part
+*.webm
+*.opus
+*.mp3
