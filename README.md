@@ -94,6 +94,31 @@ DB_PATH=./db/ytm.db
 
 ## 🔌 Connect to Your AI Tool
 
+### mcporter CLI
+
+Install [mcporter](https://mcporter.dev) and register ytm-mcp:
+
+```bash
+npm install -g mcporter
+mcporter config add ytm-mcp --stdio "node /path/to/ytm-mcp/dist/index.js"
+```
+
+List all tools:
+```bash
+mcporter list ytm-mcp
+```
+
+Call tools directly from your terminal:
+```bash
+mcporter call ytm-mcp.get_history limit=12
+mcporter call ytm-mcp.search_song query="Stars Ultra Slowed"
+mcporter call ytm-mcp.download_song url="https://music.youtube.com/watch?v=4Z8LwuQ3zao"
+mcporter call ytm-mcp.playback_control action=like
+mcporter call ytm-mcp.get_current_song
+```
+
+---
+
 ### Claude Desktop
 
 Edit `claude_desktop_config.json`:
