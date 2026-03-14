@@ -168,6 +168,32 @@ Create or edit `~/.cursor/mcp.json`:
 
 ---
 
+### Antigravity
+
+Create `mcp.json` in the Antigravity user config directory:
+- **Linux:** `~/.config/Antigravity/User/mcp.json`
+- **macOS:** `~/Library/Application Support/Antigravity/User/mcp.json`
+- **Windows:** `%APPDATA%\Antigravity\User\mcp.json`
+
+```json
+{
+  "servers": {
+    "ytm-mcp": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/path/to/ytm-mcp/dist/index.js"],
+      "env": {
+        "BROWSER_PROFILE": "/path/to/your/chrome-profile"
+      }
+    }
+  }
+}
+```
+
+Reload Antigravity (`Ctrl+Shift+P` → `Developer: Reload Window`). ✅
+
+---
+
 ### VS Code (GitHub Copilot)
 
 Create `.vscode/mcp.json` in your workspace:
