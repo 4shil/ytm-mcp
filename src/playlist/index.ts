@@ -1,4 +1,5 @@
-import db from '../db';
+import getDB from '../db';
+const db = getDB();
 import * as fs from 'fs';
 import * as path from 'path';
 

@@ -9,7 +9,8 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { initDB } from './db';
-import { scrapeHistory } from './history/index';
+
+import { scrapeHistory, getHistoryFromDB } from './history/index';
 import { createPlaylist, addToPlaylist, listPlaylists, exportPlaylist, removeFromPlaylist } from './playlist/index';
 import { playSong, play, pause, next, previous, setVolume, getCurrentSong } from './tools/playback';
 import { launchBrowser, closeBrowser } from './browser/index';
@@ -27,11 +28,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: 'get_history',
-      description: 'Get YouTube Music listening history',
+      description: 'Get YouTube Music listening history (scrapes live or returns cached)',
       inputSchema: {
         type: 'object',
         properties: {
           limit: { type: 'number', description: 'Number of songs to fetch (default 20)' },
+          use_cache: { type: 'boolean', description: 'Return cached DB results instead of scraping (default false)' },
         },
       },
     },
@@ -125,9 +127,15 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     switch (name) {
       case 'get_history': {
         const limit = (args?.limit as number) || 20;
-        await launchBrowser(true);
-        const items = await scrapeHistory(limit);
-        await closeBrowser();
+        const useCache = args?.use_cache as boolean || false;
+        let items;
+        if (useCache) {
+          items = getHistoryFromDB(limit);
+        } else {
+          await launchBrowser(true);
+          items = await scrapeHistory(limit);
+          await closeBrowser();
+        }
         return {
           content: [{ type: 'text', text: JSON.stringify(items, null, 2) }],
         };

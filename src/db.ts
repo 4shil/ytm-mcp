@@ -7,20 +7,26 @@ dotenv.config();
 
 const DB_PATH = path.resolve(process.env.DB_PATH || './db/ytm.db');
 
-// Ensure db directory exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
-const db = new Database(DB_PATH);
+let db: Database.Database;
+
+export function getDB(): Database.Database {
+  if (!db) db = new Database(DB_PATH);
+  return db;
+}
 
 export function initDB(): void {
-  db.exec(`
+  const d = getDB();
+  d.exec(`
     CREATE TABLE IF NOT EXISTS history (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
       artist TEXT,
+      album TEXT,
       duration TEXT,
       url TEXT,
-      played_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      scraped_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS playlists (
@@ -40,7 +46,12 @@ export function initDB(): void {
       added_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
-  console.log('[DB] Initialized.');
+
+  // Migrate: add album/scraped_at columns if upgrading from old schema
+  try { d.exec(`ALTER TABLE history ADD COLUMN album TEXT`); } catch {}
+  try { d.exec(`ALTER TABLE history ADD COLUMN scraped_at DATETIME`); } catch {}
+
+  console.error('[DB] Initialized.');
 }
 
-export default db;
+export default getDB;
