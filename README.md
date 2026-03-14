@@ -53,13 +53,14 @@ DB_PATH=./db/ytm.db
 
 ---
 
-## Claude Desktop Setup
+## Setup
 
-Add this to your Claude Desktop config file:
+### Claude Desktop
 
-**Linux:** `~/.config/Claude/claude_desktop_config.json`  
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+**Config file:**
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -77,13 +78,13 @@ Add this to your Claude Desktop config file:
 }
 ```
 
-> Restart Claude Desktop after saving.
+Restart Claude Desktop after saving.
 
 ---
 
-## OpenClaw MCP Setup
+### OpenClaw
 
-Add to your OpenClaw config (`~/.openclaw/config.json`):
+Add to `~/.openclaw/config.json`:
 
 ```json
 {
@@ -92,12 +93,134 @@ Add to your OpenClaw config (`~/.openclaw/config.json`):
       {
         "name": "ytm-mcp",
         "command": "node",
-        "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"]
+        "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+        "env": {
+          "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
+          "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
+          "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+        }
       }
     ]
   }
 }
 ```
+
+Or use the mcporter CLI:
+
+```bash
+mcporter add ytm-mcp --command "node /home/ashil/Coding/ytm-mcp/dist/index.js"
+```
+
+---
+
+### Cursor
+
+Add to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` globally:
+
+```json
+{
+  "mcpServers": {
+    "ytm-mcp": {
+      "command": "node",
+      "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+      "env": {
+        "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
+        "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
+        "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+      }
+    }
+  }
+}
+```
+
+---
+
+### VS Code (Copilot / MCP extension)
+
+Add to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "ytm-mcp": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+      "env": {
+        "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
+        "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
+        "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Zed
+
+Add to `~/.config/zed/settings.json`:
+
+```json
+{
+  "context_servers": {
+    "ytm-mcp": {
+      "command": {
+        "path": "node",
+        "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+        "env": {
+          "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
+          "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
+          "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+### Continue.dev
+
+Add to `~/.continue/config.json`:
+
+```json
+{
+  "experimental": {
+    "modelContextProtocolServers": [
+      {
+        "transport": {
+          "type": "stdio",
+          "command": "node",
+          "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+          "env": {
+            "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
+            "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
+            "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+---
+
+### Any MCP-Compatible Tool (Generic)
+
+The server uses **stdio transport** (standard MCP). Run it with:
+
+```bash
+node /home/ashil/Coding/ytm-mcp/dist/index.js
+```
+
+Any tool that supports MCP stdio servers can connect using:
+- **Command:** `node`
+- **Args:** `["/home/ashil/Coding/ytm-mcp/dist/index.js"]`
+- **Transport:** `stdio`
 
 ---
 
