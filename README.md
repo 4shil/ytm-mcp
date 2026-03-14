@@ -18,8 +18,8 @@ A Model Context Protocol (MCP) server for YouTube Music — control playback, br
 - Node.js 18+
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) installed (`which yt-dlp`)
 - Python `mutagen` library: `pip install mutagen`
-- Chromium browser (for playback control)
-- An active YouTube Music session in the openclaw browser profile
+- Chromium or Chrome browser (for playback control)
+- An active YouTube Music session in your browser profile
 
 ---
 
@@ -32,6 +32,15 @@ npm install
 npm run build
 ```
 
+### Find your Chrome profile path
+
+**Linux (Chrome):** `~/.config/google-chrome/Default`  
+**Linux (Chromium):** `~/.config/chromium/Default`  
+**macOS (Chrome):** `~/Library/Application Support/Google/Chrome/Default`  
+**Windows (Chrome):** `%LOCALAPPDATA%\Google\Chrome\User Data\Default`
+
+> The profile must be logged into YouTube Music already.
+
 ### Environment Variables
 
 Copy `.env.example` to `.env` and configure:
@@ -41,13 +50,16 @@ cp .env.example .env
 ```
 
 ```env
-# Path to browser profile with YouTube Music logged in
-BROWSER_PROFILE=/home/ashil/.openclaw/browser/openclaw/user-data
+# Path to Chrome/Chromium profile with YouTube Music logged in
+# Linux Chrome:   /home/<user>/.config/google-chrome/Default
+# macOS Chrome:   /Users/<user>/Library/Application Support/Google/Chrome/Default
+# Windows Chrome: C:\Users\<user>\AppData\Local\Google\Chrome\User Data\Default
+BROWSER_PROFILE=/path/to/your/chrome-profile
 
-# Directory to save downloaded songs
+# Directory to save downloaded songs (default: ./downloads)
 DOWNLOAD_DIR=./downloads
 
-# SQLite database path
+# SQLite database path (default: ./db/ytm.db)
 DB_PATH=./db/ytm.db
 ```
 
@@ -67,11 +79,11 @@ DB_PATH=./db/ytm.db
   "mcpServers": {
     "ytm-mcp": {
       "command": "node",
-      "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+      "args": ["/path/to/ytm-mcp/dist/index.js"],
       "env": {
-        "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
-        "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
-        "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+        "BROWSER_PROFILE": "/path/to/your/chrome-profile",
+        "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
+        "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
       }
     }
   }
@@ -93,11 +105,11 @@ Add to `~/.openclaw/config.json`:
       {
         "name": "ytm-mcp",
         "command": "node",
-        "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+        "args": ["/path/to/ytm-mcp/dist/index.js"],
         "env": {
-          "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
-          "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
-          "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+          "BROWSER_PROFILE": "/path/to/your/chrome-profile",
+          "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
+          "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
         }
       }
     ]
@@ -108,7 +120,7 @@ Add to `~/.openclaw/config.json`:
 Or use the mcporter CLI:
 
 ```bash
-mcporter add ytm-mcp --command "node /home/ashil/Coding/ytm-mcp/dist/index.js"
+mcporter add ytm-mcp --command "node /path/to/ytm-mcp/dist/index.js"
 ```
 
 ---
@@ -122,11 +134,11 @@ Add to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` globally
   "mcpServers": {
     "ytm-mcp": {
       "command": "node",
-      "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+      "args": ["/path/to/ytm-mcp/dist/index.js"],
       "env": {
-        "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
-        "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
-        "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+        "BROWSER_PROFILE": "/path/to/your/chrome-profile",
+        "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
+        "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
       }
     }
   }
@@ -145,11 +157,11 @@ Add to `.vscode/mcp.json`:
     "ytm-mcp": {
       "type": "stdio",
       "command": "node",
-      "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+      "args": ["/path/to/ytm-mcp/dist/index.js"],
       "env": {
-        "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
-        "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
-        "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+        "BROWSER_PROFILE": "/path/to/your/chrome-profile",
+        "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
+        "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
       }
     }
   }
@@ -168,11 +180,11 @@ Add to `~/.config/zed/settings.json`:
     "ytm-mcp": {
       "command": {
         "path": "node",
-        "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+        "args": ["/path/to/ytm-mcp/dist/index.js"],
         "env": {
-          "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
-          "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
-          "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+          "BROWSER_PROFILE": "/path/to/your/chrome-profile",
+          "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
+          "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
         }
       }
     }
@@ -194,11 +206,11 @@ Add to `~/.continue/config.json`:
         "transport": {
           "type": "stdio",
           "command": "node",
-          "args": ["/home/ashil/Coding/ytm-mcp/dist/index.js"],
+          "args": ["/path/to/ytm-mcp/dist/index.js"],
           "env": {
-            "BROWSER_PROFILE": "/home/ashil/.openclaw/browser/openclaw/user-data",
-            "DOWNLOAD_DIR": "/home/ashil/Coding/ytm-mcp/downloads",
-            "DB_PATH": "/home/ashil/Coding/ytm-mcp/db/ytm.db"
+            "BROWSER_PROFILE": "/path/to/your/chrome-profile",
+            "DOWNLOAD_DIR": "/path/to/ytm-mcp/downloads",
+            "DB_PATH": "/path/to/ytm-mcp/db/ytm.db"
           }
         }
       }
@@ -214,12 +226,12 @@ Add to `~/.continue/config.json`:
 The server uses **stdio transport** (standard MCP). Run it with:
 
 ```bash
-node /home/ashil/Coding/ytm-mcp/dist/index.js
+node /path/to/ytm-mcp/dist/index.js
 ```
 
 Any tool that supports MCP stdio servers can connect using:
 - **Command:** `node`
-- **Args:** `["/home/ashil/Coding/ytm-mcp/dist/index.js"]`
+- **Args:** `["/path/to/ytm-mcp/dist/index.js"]`
 - **Transport:** `stdio`
 
 ---
